@@ -158,3 +158,43 @@ func (s Scanner) ReadDecimalPlaces() (r string) {
 	r += e
 	return
 }
+
+func (s Scanner) ReadNumber() (i interface{}) {
+	switch c := s.Peek(); c {
+	case '#':		defer func() {
+						if recover() != nil {
+							panic("Invalid radix format")
+						}
+					}()
+					s.Next()
+					switch radix := int(s.ReadInteger(10)); s.Peek() {
+					case 'r', 'R':			s.Next()
+											i = s.ReadInteger(radix)
+					default:				panic("R missing from radix-format integer")
+					}
+
+	case '0':		s.Next()
+					switch c = s.Peek(); c {
+					case '.':				i, _ = strconv.Atof64("0" + s.ReadDecimalPlaces())
+
+					case 'x', 'X':			s.Next()
+											i = s.ReadInteger(16)
+					case 'b', 'B':			s.Next()
+											i = s.ReadInteger(2)
+
+					default:				defer func() {
+												if recover() != nil {
+													i = int64(0)
+												}
+											}()
+											i = s.ReadInteger(8)
+					}
+
+	default:		if d := s.ReadDigits(10); s.Peek() == '.' {
+						i, _ = strconv.Atof64(d + s.ReadDecimalPlaces())
+					} else {
+						i, _ = strconv.Btoi64(d, 10)
+					}
+	}
+	return
+}
