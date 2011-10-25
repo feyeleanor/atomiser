@@ -203,6 +203,7 @@ func TestReadNumber(t *testing.T) {
 	ConfirmReadNumber("0.0", float64(0))
 	ConfirmReadNumber("0.1", float64(0.1))
 	ConfirmReadNumber("0.19", float64(0.19))
+	ConfirmReadNumber("0.19", float64(0.19))
 
 	ConfirmReadNumber("0.19+1", float64(0.19))
 	ConfirmReadNumber("0.19e1", float64(0.19e+1))

@@ -129,7 +129,6 @@ func (s Scanner) ReadInteger(radix int) (i int64) {
 }
 
 func (s Scanner) ReadDecimalPlaces() (r string) {
-	r = "."
 	e := ""
 	s.Next()
 	for parsed := false; !parsed && !s.IsEOF() ; s.Next() {
@@ -175,7 +174,7 @@ func (s Scanner) ReadNumber() (i interface{}) {
 
 	case '0':		s.Next()
 					switch c = s.Peek(); c {
-					case '.':				i, _ = strconv.Atof64("0" + s.ReadDecimalPlaces())
+					case '.':				i, _ = strconv.Atof64("0." + s.ReadDecimalPlaces())
 
 					case 'x', 'X':			s.Next()
 											i = s.ReadInteger(16)
@@ -191,7 +190,7 @@ func (s Scanner) ReadNumber() (i interface{}) {
 					}
 
 	default:		if d := s.ReadDigits(10); s.Peek() == '.' {
-						i, _ = strconv.Atof64(d + s.ReadDecimalPlaces())
+						i, _ = strconv.Atof64(d + "." + s.ReadDecimalPlaces())
 					} else {
 						i, _ = strconv.Btoi64(d, 10)
 					}
