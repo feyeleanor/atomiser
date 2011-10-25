@@ -11,8 +11,8 @@ type Scanner struct {
 	*scanner.Scanner
 }
 
-func NewScanner(f io.Reader) (s Scanner) {
-	s = Scanner{new(scanner.Scanner)}
+func NewScanner(f io.Reader) (s *Scanner) {
+	s = &Scanner{new(scanner.Scanner)}
 	s.Init(f)
 	s.Mode &^= scanner.GoTokens
 	return
