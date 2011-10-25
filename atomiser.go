@@ -1,10 +1,8 @@
 package atomiser
 
 import(
-	"fmt"
 	. "github.com/feyeleanor/chain"
 	"github.com/feyeleanor/slices"
-	"scanner"
 )
 
 type Delimiter	int
@@ -21,16 +19,6 @@ func ReadPair(s Scanner, read Reader) (r interface{}) {
 		panic("extra item after .")
 	}
 	return
-}
-
-func ReadString(s Scanner, read Reader) (r string) {
-	for c := s.Next(); c != '"'; c = s.Next() {
-		if c == scanner.EOF {
-			panic("EOF in string literal")
-		}
-		r = fmt.Sprintf("%v%c", r, c)
-	}
-	return r
 }
 
 func ReadList(s Scanner, read Reader) (head *Cell) {

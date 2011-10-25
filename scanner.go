@@ -198,3 +198,16 @@ func (s Scanner) ReadNumber() (i interface{}) {
 	}
 	return
 }
+
+func (s Scanner) ReadString(d Delimiter) (r string) {
+	if !s.IsDelimiter(d) {
+		panic("Not a string")
+	}
+	for s.Next(); !s.IsDelimiter(d); s.Next() {
+		if s.IsEOF() {
+			panic("EOF in string literal")
+		}
+		r = fmt.Sprintf("%v%c", r, s.Peek())
+	}
+	return r
+}

@@ -54,10 +54,35 @@ func TestIsDelimiter(t *testing.T) {
 	RefuteDelimiter("(", ')')
 }
 
+func TestReadString(t *testing.T) {
+	ConfirmReadString := func(s string, r interface{}) {
+		if x := NewScanner(strings.NewReader(s)).ReadString('"'); x != r {
+			t.Fatalf("%v.ReadString() should be %v but is %v", s, r, x)
+		}
+	}
+
+	RefuteReadString := func(s string) {
+		var x interface{}
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatalf("%v.ReadString() should fail but is %v", s, x)
+			}
+		}()
+		x = NewScanner(strings.NewReader(s)).ReadString('"')
+	}
+
+	ConfirmReadString("\"\"", "")
+	ConfirmReadString("\"A\"", "A")
+	ConfirmReadString("\"1\"", "1")
+	RefuteReadString("")
+	RefuteReadString("\"")
+	RefuteReadString("\"A")
+	RefuteReadString("\"1")
+}
+
 func TestReadNumber(t *testing.T) {
 	ConfirmReadNumber := func(s string, r interface{}) {
-		scanner := NewScanner(strings.NewReader(s))
-		if x := scanner.ReadNumber(); x != r {
+		if x := NewScanner(strings.NewReader(s)).ReadNumber(); x != r {
 			t.Fatalf("%v.ReadNumber() should be %v but is %v", s, r, x)
 		}
 	}
