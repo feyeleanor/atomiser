@@ -7,9 +7,9 @@ import(
 
 type Delimiter	int
 
-type Reader		func(Scanner) interface{}
+type Reader		func(*Scanner) interface{}
 
-func ReadPair(s Scanner, read Reader) (r interface{}) {
+func ReadPair(s *Scanner, read Reader) (r interface{}) {
 	r = read(s)
 	if _, ok := r.(Delimiter); ok || r == nil {
 		panic("missing item after .")
@@ -21,7 +21,7 @@ func ReadPair(s Scanner, read Reader) (r interface{}) {
 	return
 }
 
-func ReadList(s Scanner, read Reader) (head *Cell) {
+func ReadList(s *Scanner, read Reader) (head *Cell) {
 	head = new(Cell)
 	for tail := head; tail != nil ; tail = tail.Tail {
 		switch obj := read(s); {
@@ -36,7 +36,7 @@ func ReadList(s Scanner, read Reader) (head *Cell) {
 	return
 }
 
-func ReadArray(s Scanner, read Reader) (array slices.Slice) {
+func ReadArray(s *Scanner, read Reader) (array slices.Slice) {
 	for obj := read(s); obj != Delimiter(']') ; obj = read(s) {
 		if obj == Delimiter('.') {
 			obj = ReadPair(s, read)
