@@ -38,7 +38,7 @@ func TestReadList(t *testing.T) {
 		return nil
 	}
 	ConfirmReadList := func(s string, r *Cell) {
-		if x := ReadList(NewScanner(strings.NewReader(s)), read); !r.Equal(x) {
+		if x := ReadList(NewScanner(strings.NewReader(s), read)); !r.Equal(x) {
 			t.Fatalf("%v.ReadList() should be %v but is %v", s, r, x)
 		}
 	}
@@ -50,7 +50,7 @@ func TestReadList(t *testing.T) {
 				t.Fatalf("%v.ReadList() should fail but is %v", s, x)
 			}
 		}()
-		x = ReadList(NewScanner(strings.NewReader(s)), read)
+		x = ReadList(NewScanner(strings.NewReader(s), read))
 	}
 
 	RefuteReadList("")

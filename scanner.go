@@ -7,26 +7,34 @@ import (
 	"strconv"
 )
 
+type Delimiter	rune
 
 type Delimiters struct {
 	Start, End	Delimiter
 }
+
+type Reader		func(*Scanner) interface{}
 
 type Scanner struct {
 	*scanner.Scanner
 	String		Delimiters
 	List		Delimiters
 	Array		Delimiters
+	Reader
 }
 
-func NewScanner(f io.Reader) (s *Scanner) {
-	s = &Scanner{ Scanner: new(scanner.Scanner) }
+func NewScanner(f io.Reader, r Reader) (s *Scanner) {
+	s = &Scanner{ Scanner: new(scanner.Scanner), Reader: r }
 	s.Init(f)
 	s.Mode &^= scanner.GoTokens
 	s.String = Delimiters{'"', '"'}
 	s.List = Delimiters{'(', ')'}
 	s.Array = Delimiters{'[', ']'}
 	return
+}
+
+func (s Scanner) Read() interface{} {
+	return s.Reader(&s)
 }
 
 func (s Scanner) IsEOF() bool {
