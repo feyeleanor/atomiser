@@ -1,11 +1,12 @@
 package atomiser
 
 import(
+//	"fmt"
 	. "github.com/feyeleanor/chain"
 	"github.com/feyeleanor/slices"
 )
 
-type Delimiter	int
+type Delimiter	rune
 
 type Reader		func(*Scanner) interface{}
 
@@ -22,15 +23,28 @@ func ReadPair(s *Scanner, read Reader) (r interface{}) {
 }
 
 func ReadList(s *Scanner, read Reader) (head *Cell) {
-	head = new(Cell)
-	for tail := head; tail != nil ; tail = tail.Tail {
-		switch obj := read(s); {
-		case obj == Delimiter(')'):	break
-		case obj == Delimiter('.'):	tail.Head = obj
-									tail.Tail = &Cell{ Head: ReadPair(s, read) }
-									tail = tail.Tail
-									break
-		default:					tail.Head = obj
+	if !s.IsDelimiter('(') {
+		panic("Not a list")
+	}
+	s.Next()
+	if v := read(s); v != Delimiter(')') {
+		if s.IsEOF() {
+			panic("EOF in list literal")
+		}
+		head = &Cell{ v, nil }
+		tail := head
+		for !s.IsDelimiter(')') {
+			s.Next()
+			if s.IsEOF() {
+				panic("EOF in list literal")
+			}
+
+			switch v := read(s); {
+			case v == Delimiter('.'):		tail.Append(ReadPair(s, read))
+//			case v == Delimiter('('):		tail.Append(ReadList(s, read))
+			default:						tail.Append(v)
+			}
+			tail = tail.Tail
 		}
 	}
 	return

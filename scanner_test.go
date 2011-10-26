@@ -31,6 +31,26 @@ func TestIsLineBreak(t *testing.T) {
 	RefuteLineBreak(" ")
 }
 
+func TestSkipWhitespace(t *testing.T) {
+	ConfirmSkipWhitespace := func(s string, r int) {
+		scanner := NewScanner(strings.NewReader(s))
+		if scanner.SkipWhitespace(); scanner.Peek() != r {
+			t.Fatalf("%v.SkipWhitespace() should be %v but is %v", s, r, scanner.Peek())
+		}
+	}
+	ConfirmSkipWhitespace("", -1)
+	ConfirmSkipWhitespace("A", 'A')
+	ConfirmSkipWhitespace(" A", 'A')
+	ConfirmSkipWhitespace("  A", 'A')
+	ConfirmSkipWhitespace("   A", 'A')
+	ConfirmSkipWhitespace("B   A", 'B')
+	ConfirmSkipWhitespace(" \tA", 'A')
+	ConfirmSkipWhitespace("  \tA", 'A')
+	ConfirmSkipWhitespace("   \tA", 'A')
+	ConfirmSkipWhitespace("B   \tA", 'B')
+	ConfirmSkipWhitespace("\tB   A", 'B')
+}
+
 func TestIsDelimiter(t *testing.T) {
 	ConfirmDelimiter := func(s string, d Delimiter) {
 		scanner := NewScanner(strings.NewReader(s))

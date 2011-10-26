@@ -29,7 +29,11 @@ func (s Scanner) IsLineBreak() bool {
 
 func (s Scanner) IsWhitespace() bool {
 	c := s.Peek()
-	return c == ' ' || s.IsLineBreak()
+	return c == ' ' || c == '\t' || s.IsLineBreak()
+}
+
+func (s Scanner) SkipWhitespace() {
+	for ; s.IsWhitespace(); s.Next() {}
 }
 
 func (s Scanner) IsDelimiter(d Delimiter) bool {
@@ -68,7 +72,7 @@ func (s Scanner) DigitValue() (r int) {
 	return
 }
 
-func (s Scanner) ReadChar() (r int) {
+func (s Scanner) ReadChar() (r rune) {
 	if c := s.Next(); c != '\\' {
 		r = c
 	} else {
