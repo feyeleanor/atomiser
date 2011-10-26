@@ -7,14 +7,25 @@ import (
 	"strconv"
 )
 
+
+type Delimiters struct {
+	Start, End	Delimiter
+}
+
 type Scanner struct {
 	*scanner.Scanner
+	String		Delimiters
+	List		Delimiters
+	Array		Delimiters
 }
 
 func NewScanner(f io.Reader) (s *Scanner) {
-	s = &Scanner{new(scanner.Scanner)}
+	s = &Scanner{ Scanner: new(scanner.Scanner) }
 	s.Init(f)
 	s.Mode &^= scanner.GoTokens
+	s.String = Delimiters{'"', '"'}
+	s.List = Delimiters{'(', ')'}
+	s.Array = Delimiters{'[', ']'}
 	return
 }
 
@@ -36,8 +47,37 @@ func (s Scanner) SkipWhitespace() {
 	for ; s.IsWhitespace(); s.Next() {}
 }
 
+func (s Scanner) NextNonWhitespace() {
+	s.Next()
+	s.SkipWhitespace()
+}
+
 func (s Scanner) IsDelimiter(d Delimiter) bool {
 	return d == Delimiter(s.Peek())
+}
+
+func (s Scanner) IsStringStart() bool {
+	return Delimiter(s.Peek()) == s.String.Start
+}
+
+func (s Scanner) IsStringEnd() bool {
+	return Delimiter(s.Peek()) == s.String.End
+}
+
+func (s Scanner) IsListStart() bool {
+	return Delimiter(s.Peek()) == s.List.Start
+}
+
+func (s Scanner) IsListEnd() bool {
+	return Delimiter(s.Peek()) == s.List.End
+}
+
+func (s Scanner) IsArrayStart() bool {
+	return Delimiter(s.Peek()) == s.Array.Start
+}
+
+func (s Scanner) IsArrayEnd() bool {
+	return Delimiter(s.Peek()) == s.Array.End
 }
 
 func (s Scanner) IsPrint() bool {
@@ -202,11 +242,11 @@ func (s Scanner) ReadNumber() (i interface{}) {
 	return
 }
 
-func (s Scanner) ReadString(d Delimiter) (r string) {
-	if !s.IsDelimiter(d) {
+func (s Scanner) ReadString() (r string) {
+	if !s.IsStringStart() {
 		panic("Not a string")
 	}
-	for s.Next(); !s.IsDelimiter(d); s.Next() {
+	for s.Next(); !s.IsStringEnd(); s.Next() {
 		if s.IsEOF() {
 			panic("EOF in string literal")
 		}

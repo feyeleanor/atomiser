@@ -12,8 +12,12 @@ func TestReadList(t *testing.T) {
 	var read func(*Scanner) interface{}
 
 	read = func(s *Scanner) interface{} {
-		for ; !s.IsEOF(); s.Next() {
-			s.SkipWhitespace()
+		for s.SkipWhitespace(); !s.IsEOF(); s.NextNonWhitespace() {
+//			switch {
+//			case s.IsListStart():			return ReadList(s, read)
+//			case s.IsListEnd():				return s.List.End
+//			}
+
 			switch c := s.Peek(); c {
 			case '#':						fallthrough
 			case '0':						fallthrough
@@ -27,8 +31,8 @@ func TestReadList(t *testing.T) {
 			case '8':						fallthrough
 			case '9':						return s.ReadNumber()
 
-			case '(':						return ReadList(s, read)
-			case ')':						return Delimiter(')')
+//			case '(':						return ReadList(s, read)
+//			case ')':						return Delimiter(')')
 			}
 		}
 		return nil

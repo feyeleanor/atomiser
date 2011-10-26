@@ -76,7 +76,7 @@ func TestIsDelimiter(t *testing.T) {
 
 func TestReadString(t *testing.T) {
 	ConfirmReadString := func(s string, r interface{}) {
-		if x := NewScanner(strings.NewReader(s)).ReadString('"'); x != r {
+		if x := NewScanner(strings.NewReader(s)).ReadString(); x != r {
 			t.Fatalf("%v.ReadString() should be %v but is %v", s, r, x)
 		}
 	}
@@ -88,7 +88,7 @@ func TestReadString(t *testing.T) {
 				t.Fatalf("%v.ReadString() should fail but is %v", s, x)
 			}
 		}()
-		x = NewScanner(strings.NewReader(s)).ReadString('"')
+		x = NewScanner(strings.NewReader(s)).ReadString()
 	}
 
 	ConfirmReadString("\"\"", "")

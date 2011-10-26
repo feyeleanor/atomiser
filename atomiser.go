@@ -23,25 +23,24 @@ func ReadPair(s *Scanner, read Reader) (r interface{}) {
 }
 
 func ReadList(s *Scanner, read Reader) (head *Cell) {
-	if !s.IsDelimiter('(') {
+	if !s.IsListStart() {
 		panic("Not a list")
 	}
-	s.Next()
-	if v := read(s); v != Delimiter(')') {
+	s.NextNonWhitespace()
+	if !s.IsListEnd() {
+		v := read(s)
 		if s.IsEOF() {
 			panic("EOF in list literal")
 		}
 		head = &Cell{ v, nil }
 		tail := head
-		for !s.IsDelimiter(')') {
-			s.Next()
-			if s.IsEOF() {
-				panic("EOF in list literal")
-			}
-
-			switch v := read(s); {
-			case v == Delimiter('.'):		tail.Append(ReadPair(s, read))
-//			case v == Delimiter('('):		tail.Append(ReadList(s, read))
+		for !s.IsListEnd() {
+			s.NextNonWhitespace()
+			switch {
+			case s.IsEOF():					panic("EOF in list literal")
+			case s.IsListEnd():				return
+			case s.IsListStart():			tail.Append(ReadList(s, read))
+			case s.IsDelimiter('.'):		tail.Append(ReadPair(s, read))
 			default:						tail.Append(v)
 			}
 			tail = tail.Tail
