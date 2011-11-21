@@ -5,120 +5,21 @@ import (
 	"testing"
 )
 
-func dummyReader(s *Scanner) interface{} {
-	return nil
-}
-
-func TestIsLineBreak(t *testing.T) {
-	ConfirmLineBreak := func(s string) {
-		scanner := NewScanner(strings.NewReader(s), dummyReader)
-		for ; !scanner.IsEOF(); scanner.Next() {
-			if !scanner.IsLineBreak() {
-				t.Fatalf("IsLineBreak() at %v should be true", scanner.Pos())
-			}
-		}
-	}
-	RefuteLineBreak := func(s string) {
-		scanner := NewScanner(strings.NewReader(s), dummyReader)
-		if scanner.IsLineBreak() {
-			t.Fatalf("IsLineBreak() at %v should be false", scanner.Pos())
-		}
-	}
-
-	ConfirmLineBreak("\n")
-	ConfirmLineBreak("\r")
-	ConfirmLineBreak("\n\r")
-	ConfirmLineBreak("\r\n")
-	ConfirmLineBreak("\n\r\n")
-	ConfirmLineBreak("\r\n\r")
-
-	RefuteLineBreak(" ")
-}
-
-func TestSkipWhitespace(t *testing.T) {
-	ConfirmSkipWhitespace := func(s string, r int) {
-		scanner := NewScanner(strings.NewReader(s), dummyReader)
-		if scanner.SkipWhitespace(); scanner.Peek() != r {
-			t.Fatalf("%v.SkipWhitespace() should be %v but is %v", s, r, scanner.Peek())
-		}
-	}
-	ConfirmSkipWhitespace("", -1)
-	ConfirmSkipWhitespace("A", 'A')
-	ConfirmSkipWhitespace(" A", 'A')
-	ConfirmSkipWhitespace("  A", 'A')
-	ConfirmSkipWhitespace("   A", 'A')
-	ConfirmSkipWhitespace("B   A", 'B')
-	ConfirmSkipWhitespace(" \tA", 'A')
-	ConfirmSkipWhitespace("  \tA", 'A')
-	ConfirmSkipWhitespace("   \tA", 'A')
-	ConfirmSkipWhitespace("B   \tA", 'B')
-	ConfirmSkipWhitespace("\tB   A", 'B')
-}
-
-func TestIsDelimiter(t *testing.T) {
-	ConfirmDelimiter := func(s string, d Delimiter) {
-		scanner := NewScanner(strings.NewReader(s), dummyReader)
-		for ; !scanner.IsEOF(); scanner.Next() {
-			if !scanner.IsDelimiter(d) {
-				t.Fatalf("IsDelimiter() at %v should be true", scanner.Pos())
-			}
-		}
-	}
-	RefuteDelimiter := func(s string, d Delimiter) {
-		scanner := NewScanner(strings.NewReader(s), dummyReader)
-		for ; !scanner.IsEOF(); scanner.Next() {
-			if scanner.IsDelimiter(d) {
-				t.Fatalf("IsDelimiter() at %v should be false", scanner.Pos())
-			}
-		}
-	}
-
-	ConfirmDelimiter(")", ')')
-	ConfirmDelimiter("))", ')')
-	RefuteDelimiter("(", ')')
-}
-
-func TestReadString(t *testing.T) {
-	ConfirmReadString := func(s string, r interface{}) {
-		if x := NewScanner(strings.NewReader(s), dummyReader).ReadString(); x != r {
-			t.Fatalf("%v.ReadString() should be %v but is %v", s, r, x)
-		}
-	}
-
-	RefuteReadString := func(s string) {
-		var x interface{}
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatalf("%v.ReadString() should fail but is %v", s, x)
-			}
-		}()
-		x = NewScanner(strings.NewReader(s), dummyReader).ReadString()
-	}
-
-	ConfirmReadString("\"\"", "")
-	ConfirmReadString("\"A\"", "A")
-	ConfirmReadString("\"1\"", "1")
-	RefuteReadString("")
-	RefuteReadString("\"")
-	RefuteReadString("\"A")
-	RefuteReadString("\"1")
-}
-
 func TestReadNumber(t *testing.T) {
 	ConfirmReadNumber := func(s string, r interface{}) {
-		if x := NewScanner(strings.NewReader(s), dummyReader).ReadNumber(); x != r {
-			t.Fatalf("%v.ReadNumber() should be %v but is %v", s, r, x)
+		if x := NewLisper(strings.NewReader(s)).ReadSymbol(); x != r {
+			t.Fatalf("%v.ReadSymbol() should be %v but is %v", s, r, x)
 		}
 	}
 
 	RefuteReadNumber := func(s string) {
-		var x interface{}
 		defer func() {
-			if r := recover(); r == nil {
-				t.Fatalf("%v.ReadNumber() should fail but is %v", s, x)
-			}
+			recover()
 		}()
-		x = NewScanner(strings.NewReader(s), dummyReader).ReadNumber()
+		switch n := NewLisper(strings.NewReader(s)).ReadSymbol().(type) {
+		case int64:			t.Fatalf("%v.ReadSymbol() returned a %T", s, n)
+		case float64:		t.Fatalf("%v.ReadSymbol() returned a %T", s, n)
+		}
 	}
 
 	RefuteReadNumber("]")

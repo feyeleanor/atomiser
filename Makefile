@@ -3,7 +3,7 @@ include $(GOROOT)/src/Make.inc
 TARG=feyeleanor/atomiser
 
 GOFILES=\
-	scanner.go\
-	atomiser.go
+	atomiser.go\
+	lisper.go
 
 include $(GOROOT)/src/Make.pkg
