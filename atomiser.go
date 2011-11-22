@@ -5,7 +5,7 @@ import (
 	"github.com/feyeleanor/chain"
 	"github.com/feyeleanor/slices"
 	"io"
-	"scanner"
+	"text/scanner"
 )
 
 type Symbol		string

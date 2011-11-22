@@ -1,7 +1,7 @@
 package atomiser
 
 import(
-	"big"
+	"math/big"
 	"fmt"
 	"io"
 	"strconv"
