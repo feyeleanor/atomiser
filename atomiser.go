@@ -104,7 +104,7 @@ func (a Atomiser) IsAlpha() bool {
 }
 
 func (a Atomiser) IsRadix(r int) (ok bool) {
-	c := a.Peek()
+	c := int(a.Peek())
 	switch {
 	case r <= 10:	ok = '0' <= c && c < ('0' + r)
 	case r <= 36:	if ok = '0' <= c && c <= '9'; !ok {
@@ -115,7 +115,7 @@ func (a Atomiser) IsRadix(r int) (ok bool) {
 	return
 }
 
-func (a Atomiser) DigitValue() (r int) {
+func (a Atomiser) DigitValue() (r rune) {
 	switch c := a.Next(); {
 	case '0' <= c && c <= '9':		r = c - '0'
 	case 'A' <= c && c <= 'Z':		r = c - 'A' + 10

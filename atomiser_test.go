@@ -38,7 +38,7 @@ func TestIsLineBreak(t *testing.T) {
 }
 
 func TestSkipWhitespace(t *testing.T) {
-	ConfirmSkipWhitespace := func(s string, r int) {
+	ConfirmSkipWhitespace := func(s string, r rune) {
 		scanner := NewAtomiser(strings.NewReader(s))
 		if scanner.SkipWhitespace(); scanner.Peek() != r {
 			t.Fatalf("%v.SkipWhitespace() should be %v but is %v", s, r, scanner.Peek())

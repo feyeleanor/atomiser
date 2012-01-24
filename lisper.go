@@ -26,7 +26,7 @@ func (l Lisper) ReadDigits(radix int) (r string) {
 
 func (l Lisper) ReadInteger(radix int) int64 {
 	d := l.ReadDigits(radix)
-	if i, e := strconv.Btoi64(d, radix); e == nil {
+	if i, e := strconv.ParseInt(d, radix, 64); e == nil {
 		return i
 	}
 	i := big.NewInt(0)
@@ -80,7 +80,7 @@ func (l Lisper) ReadSymbol() (i interface{}) {
 
 	case '0':		l.Next()
 					switch c = l.Peek(); c {
-					case '.':				i, _ = strconv.Atof64("0." + l.ReadDecimalPlaces(10))
+					case '.':				i, _ = strconv.ParseFloat("0."+l.ReadDecimalPlaces(10), 64)
 
 					case 'x', 'X':			l.Next()
 											i = l.ReadInteger(16)
@@ -97,9 +97,9 @@ func (l Lisper) ReadSymbol() (i interface{}) {
 
 	default:		if l.IsRadix(10) {
 						if d := l.ReadDigits(10); l.Peek() == '.' {
-							i, _ = strconv.Atof64(d + "." + l.ReadDecimalPlaces(10))
+							i, _ = strconv.ParseFloat(d+"."+l.ReadDecimalPlaces(10), 64)
 						} else {
-							i, _ = strconv.Btoi64(d, 10)
+							i, _ = strconv.ParseInt(d, 10, 64)
 						}
 					} else {
 						i = l.Atomiser.ReadSymbol()
