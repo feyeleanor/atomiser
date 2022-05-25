@@ -1,27 +1,33 @@
 package atomiser
 
 import (
-	. "github.com/feyeleanor/chain"
-	"github.com/feyeleanor/slices"
-	"strings"
 	"testing"
+
+	"github.com/feyeleanor/chain"
+	"github.com/feyeleanor/slices"
 )
 
 func dummyReader(a *Atomiser) any {
 	return nil
 }
 
+func runScanner(s string, f func(*Atomiser)) {
+	scanner := NewAtomiser(s)
+	for ; !scanner.IsEOF(); scanner.Next() {
+		f(scanner)
+	}
+}
+
 func TestIsLineBreak(t *testing.T) {
 	ConfirmLineBreak := func(s string) {
-		scanner := NewAtomiser(strings.NewReader(s))
-		for ; !scanner.IsEOF(); scanner.Next() {
+		runScanner(s, func(scanner *Atomiser) {
 			if !scanner.IsLineBreak() {
 				t.Fatalf("IsLineBreak() at %v should be true", scanner.Pos())
 			}
-		}
+		})
 	}
 	RefuteLineBreak := func(s string) {
-		scanner := NewAtomiser(strings.NewReader(s))
+		scanner := NewAtomiser(s)
 		if scanner.IsLineBreak() {
 			t.Fatalf("IsLineBreak() at %v should be false", scanner.Pos())
 		}
@@ -39,7 +45,7 @@ func TestIsLineBreak(t *testing.T) {
 
 func TestSkipWhitespace(t *testing.T) {
 	ConfirmSkipWhitespace := func(s string, r rune) {
-		scanner := NewAtomiser(strings.NewReader(s))
+		scanner := NewAtomiser(s)
 		if scanner.SkipWhitespace(); scanner.Peek() != r {
 			t.Fatalf("%v.SkipWhitespace() should be %v but is %v", s, r, scanner.Peek())
 		}
@@ -58,21 +64,19 @@ func TestSkipWhitespace(t *testing.T) {
 }
 
 func TestIsDelimiter(t *testing.T) {
-	ConfirmDelimiter := func(s string, d Delimiter) {
-		scanner := NewAtomiser(strings.NewReader(s))
-		for ; !scanner.IsEOF(); scanner.Next() {
+	ConfirmDelimiter := func(s string, d rune) {
+		runScanner(s, func(scanner *Atomiser) {
 			if !scanner.IsDelimiter(d) {
 				t.Fatalf("IsDelimiter() at %v should be true", scanner.Pos())
 			}
-		}
+		})
 	}
-	RefuteDelimiter := func(s string, d Delimiter) {
-		scanner := NewAtomiser(strings.NewReader(s))
-		for ; !scanner.IsEOF(); scanner.Next() {
+	RefuteDelimiter := func(s string, d rune) {
+		runScanner(s, func(scanner *Atomiser) {
 			if scanner.IsDelimiter(d) {
 				t.Fatalf("IsDelimiter() at %v should be false", scanner.Pos())
 			}
-		}
+		})
 	}
 
 	ConfirmDelimiter(")", ')')
@@ -82,7 +86,7 @@ func TestIsDelimiter(t *testing.T) {
 
 func TestReadSymbol(t *testing.T) {
 	ConfirmReadSymbol := func(s, r string) {
-		if x := NewAtomiser(strings.NewReader(s)).ReadSymbol(); x != Symbol(r) {
+		if x := NewAtomiser(s).ReadSymbol(); x != Symbol(r) {
 			t.Fatalf("%v.ReadSymbol() should be %v but is %v", s, r, x)
 		}
 	}
@@ -111,10 +115,9 @@ func TestReadSymbol(t *testing.T) {
 	ConfirmReadSymbol("'A", "'A")
 }
 
-
 func TestReadString(t *testing.T) {
-	ConfirmReadString := func(s string, r any) {
-		if x := string(NewAtomiser(strings.NewReader(s)).ReadString()); x != r {
+	ConfirmReadString := func(s string, r string) {
+		if x := NewAtomiser(s).ReadString(); x != r {
 			t.Fatalf("%v.ReadString() should be %v but is %v", s, r, x)
 		}
 	}
@@ -126,7 +129,7 @@ func TestReadString(t *testing.T) {
 				t.Fatalf("%v.ReadString() should fail but is %v", s, x)
 			}
 		}()
-		x = NewAtomiser(strings.NewReader(s)).ReadString()
+		x = NewAtomiser(s).ReadString()
 	}
 
 	ConfirmReadString("\"\"", "")
@@ -139,12 +142,12 @@ func TestReadString(t *testing.T) {
 }
 
 func TestReadList(t *testing.T) {
-	ConsSymbols := func(values ...any) (r *Cell) {
+	ConsSymbols := func(values ...any) (r *chain.Cell) {
 		if len(values) > 0 {
 			if n, ok := values[0].(string); ok {
-				r = &Cell{ Head: Symbol(n) }
+				r = &chain.Cell{Head: Symbol(n)}
 			} else {
-				r = &Cell{ Head: values[0] }
+				r = &chain.Cell{Head: values[0]}
 			}
 			c := r
 			for _, v := range values[1:] {
@@ -159,8 +162,8 @@ func TestReadList(t *testing.T) {
 		return
 	}
 
-	ConfirmReadList := func(s string, r *Cell) {
-		if x := NewAtomiser(strings.NewReader(s)).ReadList(); !r.Equal(x) {
+	ConfirmReadList := func(s string, r *chain.Cell) {
+		if x := NewAtomiser(s).ReadList(); !r.Equal(x) {
 			if x == nil {
 				t.Fatalf("%v.ReadList() should be %v but is nil", s, r)
 			} else {
@@ -170,24 +173,24 @@ func TestReadList(t *testing.T) {
 	}
 
 	ConfirmReadList("()", nil)
-	ConfirmReadList("()", Cons())
-	ConfirmReadList("()", (*Cell)(nil))
+	ConfirmReadList("()", chain.Cons())
+	ConfirmReadList("()", (*chain.Cell)(nil))
 	ConfirmReadList("(0)", ConsSymbols("0"))
-	ConfirmReadList("((0))", Cons(ConsSymbols("0")))
+	ConfirmReadList("((0))", chain.Cons(ConsSymbols("0")))
 
 	ConfirmReadList("(0 1 2 3)", ConsSymbols("0", "1", "2", "3"))
-	ConfirmReadList("(0 (1))", Cons(Symbol("0"), ConsSymbols("1")))
-	ConfirmReadList("(0 (1 (2)))", Cons(Symbol("0"), Cons(Symbol("1"), ConsSymbols("2"))))
-	ConfirmReadList("(0 (1) (2))", Cons(Symbol("0"), ConsSymbols("1"), ConsSymbols("2")))
-	ConfirmReadList("((0 1 (2 3)))", Cons(Cons(Symbol("0"), Symbol("1"), ConsSymbols("2", "3"))))
-	ConfirmReadList("(0 (1 (2 (3))))", Cons(Cons(Symbol("0"), Symbol("1"), Cons(Symbol("2"), ConsSymbols("3")))))
+	ConfirmReadList("(0 (1))", chain.Cons(Symbol("0"), ConsSymbols("1")))
+	ConfirmReadList("(0 (1 (2)))", chain.Cons(Symbol("0"), chain.Cons(Symbol("1"), ConsSymbols("2"))))
+	ConfirmReadList("(0 (1) (2))", chain.Cons(Symbol("0"), ConsSymbols("1"), ConsSymbols("2")))
+	ConfirmReadList("((0 1 (2 3)))", chain.Cons(chain.Cons(Symbol("0"), Symbol("1"), ConsSymbols("2", "3"))))
+	ConfirmReadList("(0 (1 (2 (3))))", chain.Cons(chain.Cons(Symbol("0"), Symbol("1"), chain.Cons(Symbol("2"), ConsSymbols("3")))))
 
-	ConsStrings := func(values ...any) (r *Cell) {
+	ConsStrings := func(values ...any) (r *chain.Cell) {
 		if len(values) > 0 {
 			if n, ok := values[0].(string); ok {
-				r = &Cell{ Head: String(n) }
+				r = &chain.Cell{Head: String(n)}
 			} else {
-				r = &Cell{ Head: values[0] }
+				r = &chain.Cell{Head: values[0]}
 			}
 			c := r
 			for _, v := range values[1:] {
@@ -221,7 +224,7 @@ func TestReadArray(t *testing.T) {
 	}
 
 	ConfirmReadArray := func(s string, r slices.Slice) {
-		if x := NewAtomiser(strings.NewReader(s)).ReadArray(); !r.Equal(x) {
+		if x := NewAtomiser(s).ReadArray(); !r.Equal(x) {
 			t.Fatalf("%v.ReadArray() should be %v but is %v", s, r, x)
 		}
 	}

@@ -1,13 +1,10 @@
 package atomiser
 
-import (
-	"strings"
-	"testing"
-)
+import "testing"
 
 func TestReadNumber(t *testing.T) {
 	ConfirmReadNumber := func(s string, r any) {
-		if x := NewLisper(strings.NewReader(s)).ReadSymbol(); x != r {
+		if x := NewLisper(s).ReadSymbol(); x != r {
 			t.Fatalf("%v.ReadSymbol() should be %v but is %v", s, r, x)
 		}
 	}
@@ -16,9 +13,11 @@ func TestReadNumber(t *testing.T) {
 		defer func() {
 			recover()
 		}()
-		switch n := NewLisper(strings.NewReader(s)).ReadSymbol().(type) {
-		case int64:			t.Fatalf("%v.ReadSymbol() returned a %T", s, n)
-		case float64:		t.Fatalf("%v.ReadSymbol() returned a %T", s, n)
+		switch n := NewLisper(s).ReadSymbol().(type) {
+		case int64:
+			t.Fatalf("%v.ReadSymbol() returned a %T", s, n)
+		case float64:
+			t.Fatalf("%v.ReadSymbol() returned a %T", s, n)
 		}
 	}
 

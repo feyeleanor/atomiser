@@ -3,6 +3,7 @@ package atomiser
 import (
 	"fmt"
 	"io"
+	"strings"
 	"text/scanner"
 
 	"github.com/feyeleanor/chain"
@@ -10,15 +11,19 @@ import (
 )
 
 type Symbol string
-type String string
-
-type Delimiter rune
+type String = string
 
 type Delimiters struct {
-	Start, End Delimiter
+	Start, End rune
 }
 
-type Reader func(*Atomiser) any
+func (d Delimiters) IsStart(v rune) bool {
+	return v == d.Start
+}
+
+func (d Delimiters) IsEnd(v rune) bool {
+	return v == d.End
+}
 
 type Atomiser struct {
 	*scanner.Scanner
@@ -27,14 +32,19 @@ type Atomiser struct {
 	Array  Delimiters
 }
 
-func NewAtomiser(f io.Reader) (a *Atomiser) {
+func NewAtomiser(f any) (a *Atomiser) {
 	a = &Atomiser{
 		Scanner: new(scanner.Scanner),
 		String:  Delimiters{'"', '"'},
 		List:    Delimiters{'(', ')'},
 		Array:   Delimiters{'[', ']'},
 	}
-	a.Init(f)
+	switch f := f.(type) {
+	case string:
+		a.Init(strings.NewReader(f))
+	case io.Reader:
+		a.Init(f)
+	}
 	a.Mode &^= scanner.GoTokens
 	return
 }
@@ -63,32 +73,32 @@ func (a Atomiser) NextToken() {
 	a.SkipWhitespace()
 }
 
-func (a Atomiser) IsDelimiter(d Delimiter) bool {
-	return d == Delimiter(a.Peek())
+func (a Atomiser) IsDelimiter(d rune) bool {
+	return d == a.Peek()
 }
 
 func (a Atomiser) IsStringStart() bool {
-	return Delimiter(a.Peek()) == a.String.Start
+	return a.IsDelimiter(a.String.Start)
 }
 
 func (a Atomiser) IsStringEnd() bool {
-	return Delimiter(a.Peek()) == a.String.End
+	return a.IsDelimiter(a.String.End)
 }
 
 func (a Atomiser) IsListStart() bool {
-	return Delimiter(a.Peek()) == a.List.Start
+	return a.IsDelimiter(a.List.Start)
 }
 
 func (a Atomiser) IsListEnd() bool {
-	return Delimiter(a.Peek()) == a.List.End
+	return a.IsDelimiter(a.List.End)
 }
 
 func (a Atomiser) IsArrayStart() bool {
-	return Delimiter(a.Peek()) == a.Array.Start
+	return a.IsDelimiter(a.Array.Start)
 }
 
 func (a Atomiser) IsArrayEnd() bool {
-	return Delimiter(a.Peek()) == a.Array.End
+	return a.IsDelimiter(a.Array.End)
 }
 
 func (a Atomiser) IsValidSymbol() bool {
