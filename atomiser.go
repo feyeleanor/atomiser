@@ -13,6 +13,22 @@ import (
 type Symbol string
 type String = string
 
+func Scan(s, f any) {
+	scanner := NewAtomiser(s)
+
+	switch f := f.(type) {
+	case func(*Atomiser):
+		for ; !scanner.IsEOF(); scanner.Next() {
+			f(scanner)
+		}
+	case func(int, *Atomiser):
+		for i := 0; !scanner.IsEOF(); scanner.Next() {
+			f(i, scanner)
+			i++
+		}
+	}
+}
+
 type Delimiters struct {
 	Start, End rune
 }

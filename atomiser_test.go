@@ -7,20 +7,9 @@ import (
 	"github.com/feyeleanor/slices"
 )
 
-func dummyReader(a *Atomiser) any {
-	return nil
-}
-
-func runScanner(s string, f func(*Atomiser)) {
-	scanner := NewAtomiser(s)
-	for ; !scanner.IsEOF(); scanner.Next() {
-		f(scanner)
-	}
-}
-
 func TestIsLineBreak(t *testing.T) {
 	ConfirmLineBreak := func(s string) {
-		runScanner(s, func(scanner *Atomiser) {
+		Scan(s, func(scanner *Atomiser) {
 			if !scanner.IsLineBreak() {
 				t.Fatalf("IsLineBreak() at %v should be true", scanner.Pos())
 			}
@@ -65,14 +54,14 @@ func TestSkipWhitespace(t *testing.T) {
 
 func TestIsDelimiter(t *testing.T) {
 	ConfirmDelimiter := func(s string, d rune) {
-		runScanner(s, func(scanner *Atomiser) {
+		Scan(s, func(scanner *Atomiser) {
 			if !scanner.IsDelimiter(d) {
 				t.Fatalf("IsDelimiter() at %v should be true", scanner.Pos())
 			}
 		})
 	}
 	RefuteDelimiter := func(s string, d rune) {
-		runScanner(s, func(scanner *Atomiser) {
+		Scan(s, func(scanner *Atomiser) {
 			if scanner.IsDelimiter(d) {
 				t.Fatalf("IsDelimiter() at %v should be false", scanner.Pos())
 			}
