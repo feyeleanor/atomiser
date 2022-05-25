@@ -68,7 +68,7 @@ func (l Lisper) ReadDecimalPlaces(r int) string {
 	return string(append(m, e...))
 }
 
-func (l Lisper) ReadSymbol() (i interface{}) {
+func (l Lisper) ReadSymbol() (i any) {
 	switch c := l.Peek(); c {
 	case '#':		l.Next()
 					switch radix := int(l.ReadInteger(10)); l.Peek() {

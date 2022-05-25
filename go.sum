@@ -1,0 +1,6 @@
+github.com/feyeleanor/chain v0.0.0-20220219201340-fc2bd72c2de0 h1:B3lOnrlSP8Yu0DX79aU1I1dRzgQNGrAGJcUvz85br1E=
+github.com/feyeleanor/chain v0.0.0-20220219201340-fc2bd72c2de0/go.mod h1:oSQUSvu4dS0WyM3MfOQkX6WBBO08xSESepAd+0m1aeo=
+github.com/feyeleanor/raw v0.0.0-20161230191433-4ad22e6f1008 h1:W7nY3ENJAKumJnCLypnkjZZO3yD+FMvUPWLoKnlfF20=
+github.com/feyeleanor/raw v0.0.0-20161230191433-4ad22e6f1008/go.mod h1:3lnUGOE/BGOicxToTnHTiFYUG1Bup5K18K76HBhNuWU=
+github.com/feyeleanor/slices v0.0.0-20220503171503-0981db278772 h1:9VRpNAchxjfkOIzXtEYkfMOa8AQnl2ZGmyZhjhXZNAk=
+github.com/feyeleanor/slices v0.0.0-20220503171503-0981db278772/go.mod h1:bgt0dkTIeOgY3WQKdgxRoPBgn4ORq14A+ne33PVRGzo=

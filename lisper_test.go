@@ -6,7 +6,7 @@ import (
 )
 
 func TestReadNumber(t *testing.T) {
-	ConfirmReadNumber := func(s string, r interface{}) {
+	ConfirmReadNumber := func(s string, r any) {
 		if x := NewLisper(strings.NewReader(s)).ReadSymbol(); x != r {
 			t.Fatalf("%v.ReadSymbol() should be %v but is %v", s, r, x)
 		}

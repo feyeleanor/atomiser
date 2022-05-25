@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func dummyReader(a *Atomiser) interface{} {
+func dummyReader(a *Atomiser) any {
 	return nil
 }
 
@@ -113,14 +113,14 @@ func TestReadSymbol(t *testing.T) {
 
 
 func TestReadString(t *testing.T) {
-	ConfirmReadString := func(s string, r interface{}) {
+	ConfirmReadString := func(s string, r any) {
 		if x := string(NewAtomiser(strings.NewReader(s)).ReadString()); x != r {
 			t.Fatalf("%v.ReadString() should be %v but is %v", s, r, x)
 		}
 	}
 
 	RefuteReadString := func(s string) {
-		var x interface{}
+		var x any
 		defer func() {
 			if r := recover(); r == nil {
 				t.Fatalf("%v.ReadString() should fail but is %v", s, x)
@@ -139,7 +139,7 @@ func TestReadString(t *testing.T) {
 }
 
 func TestReadList(t *testing.T) {
-	ConsSymbols := func(values ...interface{}) (r *Cell) {
+	ConsSymbols := func(values ...any) (r *Cell) {
 		if len(values) > 0 {
 			if n, ok := values[0].(string); ok {
 				r = &Cell{ Head: Symbol(n) }
@@ -182,7 +182,7 @@ func TestReadList(t *testing.T) {
 	ConfirmReadList("((0 1 (2 3)))", Cons(Cons(Symbol("0"), Symbol("1"), ConsSymbols("2", "3"))))
 	ConfirmReadList("(0 (1 (2 (3))))", Cons(Cons(Symbol("0"), Symbol("1"), Cons(Symbol("2"), ConsSymbols("3")))))
 
-	ConsStrings := func(values ...interface{}) (r *Cell) {
+	ConsStrings := func(values ...any) (r *Cell) {
 		if len(values) > 0 {
 			if n, ok := values[0].(string); ok {
 				r = &Cell{ Head: String(n) }
@@ -209,7 +209,7 @@ func TestReadList(t *testing.T) {
 }
 
 func TestReadArray(t *testing.T) {
-	ConsSymbols := func(values ...interface{}) (r slices.Slice) {
+	ConsSymbols := func(values ...any) (r slices.Slice) {
 		for _, v := range values {
 			if n, ok := v.(string); ok {
 				r = append(r, Symbol(n))
@@ -238,7 +238,7 @@ func TestReadArray(t *testing.T) {
 	ConfirmReadArray("[[0 1 [2 3]]]", ConsSymbols(ConsSymbols("0", Symbol("1"), ConsSymbols("2", "3"))))
 	ConfirmReadArray("[0 [1 [2 [3]]]]", ConsSymbols("0", ConsSymbols("1", ConsSymbols("2", ConsSymbols("3")))))
 
-	ConsStrings := func(values ...interface{}) (r slices.Slice) {
+	ConsStrings := func(values ...any) (r slices.Slice) {
 		for _, v := range values {
 			if n, ok := v.(string); ok {
 				r = append(r, String(n))
