@@ -74,8 +74,8 @@ func TestIsDelimiter(t *testing.T) {
 }
 
 func TestReadSymbol(t *testing.T) {
-	ConfirmReadSymbol := func(s, r string) {
-		if x := NewAtomiser(s).ReadSymbol(); x != Symbol(r) {
+	ConfirmReadSymbol := func(s string, r Symbol) {
+		if x := NewAtomiser(s).ReadSymbol(); x != r {
 			t.Fatalf("%v.ReadSymbol() should be %v but is %v", s, r, x)
 		}
 	}
